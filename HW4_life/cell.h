@@ -14,9 +14,16 @@ public:
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    QColor get_color(){ return color_; }
+    void set_color(QColor color){
+        color_=color;
+        update();
+    }
 
 signals:
-
+    void RightClick(Cell * c);
+    void LeftClick(Cell * c);
 public slots:
 
 private:

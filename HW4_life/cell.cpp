@@ -31,13 +31,20 @@ void Cell::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
 
     QBrush b = painter->brush();
-    painter->setBrush(QBrush(color_.dark(option->state & QStyle::State_Sunken ? 120 : 100)));
+    painter->setBrush(QBrush(color_));
 
     painter->drawRect(QRect(this->x_, this->y_, x_ + sceneWidth_, y_ + sceneHeight_));
-    qDebug() << "x: " << x_;
-    qDebug() << "width: " << sceneWidth_;
-    qDebug() << "y: " << y_;
-    qDebug() << "height: " << sceneHeight_;
 
     painter->setBrush(b);
+}
+
+void Cell::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if(event->buttons() == Qt::RightButton){ //right click
+        emit RightClick(this);
+    }
+    if(event->buttons() == Qt::LeftButton){
+        emit LeftClick(this);
+    }
+
 }
