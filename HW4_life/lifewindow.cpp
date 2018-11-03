@@ -15,21 +15,27 @@ LifeWindow::LifeWindow(QWidget *parent) :
     QGraphicsView* barView = ui->barView;
     cellView->setScene(cellScene);
     cellView->setSceneRect(0,0,cellView->frameSize().width()-10,cellView->frameSize().height()-10);
-    height_ = cellView->frameSize().height() - 10;
-    width_ = cellView->frameSize().width() - 10;
-    for(int i = 0; i < cellView->frameSize().width(); i = i + width_/20) {
-        cellScene->addLine(i, 0, i, height_);
+    cellHeight_ = cellView->frameSize().height() - 10;
+    cellWidth_ = cellView->frameSize().width() - 10;
+    for(int i = 0; i < cellView->frameSize().width(); i = i + cellWidth_/20) {
+        cellScene->addLine(i, 0, i, cellHeight_);
     }
-    for(int i = 0; i < cellView->frameSize().height(); i = i +height_/10) {
-        cellScene->addLine(0, i, width_, i);
+    for(int i = 0; i < cellView->frameSize().height(); i = i + cellHeight_/10) {
+        cellScene->addLine(0, i, cellWidth_, i);
     }
     ui->speed->setText(QString("Speed: ")+QString::number(speed_, 'f', 6));
 
     srand(time(0));
-    populate();
     barView->setScene(barScene);
-    barView->setSceneRect(0,0,barView->frameSize().width()-10,barView->frameSize().height()-10);
-    barScene->addRect(0, (barView->frameSize().height()-10)*(1-(population_/200.0)), width_/20 , barView->frameSize().height()-10);
+    barHeight_ = barView->frameSize().height() - 10;
+    barWidth_ = barView->frameSize().width() - 10;
+    barView->setSceneRect(0,0,barWidth_,barHeight_);
+
+    for(int i = 0; i < 20; i++) { //initilize bars_
+        bars_[i] = 0.0;
+    }
+
+    populate();
 
     timer = new QTimer;
     connect(timer, SIGNAL(timeout()), this, SLOT(on_playButton_clicked()));
@@ -54,26 +60,70 @@ void LifeWindow::populate(){
             } else{
                 color.setRgb(255, 255, 255);
             }
-            Cell * item = new Cell(color, j, i, width_/20, height_/10);
+            Cell * item = new Cell(color, j, i, cellWidth_/20, cellHeight_/10);
             cells[i][j] = item;
             cellScene->addItem(item);
             connect(item, &Cell::RightClick, this, &LifeWindow::RightClickSlot);
             connect(item, &Cell::LeftClick, this, &LifeWindow::LeftClickSlot);
         }
     }
-
+    GenerateBars();
     ui->turn->setText(QString("Turn: 0"));
     ui->population->setText(QString("Population: ")+QString::number(population_)+QString(" (")+QString::number((population_*100)/200)+QString("%)"));
+}
+
+void LifeWindow::TakeTurn(){
+   IncreaseTurn();
+   RepaintCells();
+   GenerateBars();
+}
+
+void LifeWindow::RepaintCells(){
+    for(int i = 0; i < 10; i++) {
+        for(int j = 0; j < 20; j++) {
+            if(cells[i][j]->get_color() == QColor(255,0,0)){
+                cells[i][j]->set_color(QColor(66, 158, 244));
+            }
+        }
+    }
+    cellScene->update();
+}
+
+void LifeWindow::GenerateBars(){
+    if(bars_[19] != 0.0){
+        barScene->clear();
+        barScene->update();
+        for(int i = 0; i < 19; i++) {
+            bars_[i] = bars_[i+1];
+            barScene->addRect(i*(barWidth_/20), (barHeight_)*(1-(bars_[i])), barWidth_/20 , barHeight_);
+        }
+        bars_[19] = population_/200.0;
+        barScene->addRect(19*(barWidth_/20), (barHeight_)*(1-(bars_[19])), barWidth_/20 , barHeight_);
+        return;
+    }
+
+    for(int i = 0; i < 20; i++) {
+        if(bars_[i] == 0.0) {
+            bars_[i] = population_/200.0;
+            barScene->addRect(i*(barWidth_/20), (barHeight_)*(1-(bars_[i])), barWidth_/20 , barHeight_);
+            return;
+        }
+    }
 }
 
 void LifeWindow::on_newSampleButton_clicked()
 {
     populate();
+    for(int i = 0; i < 20; i++) { //reset bars
+        bars_[i] = 0.0;
+    }
+    barScene->clear(); //clear the bars
+    barScene->update();
 }
 
 void LifeWindow::on_stepButton_clicked()
 {
-    IncreaseTurn();
+    TakeTurn();
 }
 
 void LifeWindow::on_speedSlider_valueChanged(int value)
@@ -100,7 +150,7 @@ void LifeWindow::RightClickSlot(Cell * c){
 
 void LifeWindow::on_playButton_clicked()
 {
-    IncreaseTurn();
+    TakeTurn();
     timer->start(speed_*1000);
 }
 

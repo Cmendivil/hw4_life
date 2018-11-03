@@ -19,6 +19,9 @@ public:
     ~LifeWindow();
     void populate();
     void IncreaseTurn();
+    void TakeTurn();
+    void GenerateBars();
+    void RepaintCells();
 
 
 private slots:
@@ -42,11 +45,14 @@ private:
     QGraphicsScene *barScene;
     QTimer *timer;
     Cell * cells[10][20];
-    int height_;
-    int width_;
+    int cellHeight_;
+    int cellWidth_;
+    int barHeight_;
+    int barWidth_;
     int turn_ = 0;
     int population_ = 0;
     double speed_ = 1.0;
+    double bars_[20];
 };
 
 #endif // LIFEWINDOW_H
