@@ -22,6 +22,9 @@ public:
     void TakeTurn();
     void GenerateBars();
     void RepaintCells();
+    int CountNeighbors(int i, int j);
+    bool IsAlive(int i, int j);
+    void changePopulation(int x);
 
 
 private slots:

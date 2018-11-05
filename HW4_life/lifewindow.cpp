@@ -75,7 +75,92 @@ void LifeWindow::populate(){
 void LifeWindow::TakeTurn(){
    IncreaseTurn();
    RepaintCells();
+   qDebug() << "top left: " << CountNeighbors(0,0);
+   qDebug() << "top right: " << CountNeighbors(0,19);
+   qDebug() << "bottom left: " << CountNeighbors(9,0);
+   qDebug() << "bottom right: " << CountNeighbors(9,19);
+   qDebug() << "left edge: " << CountNeighbors(1, 0);
+   qDebug() << "top edge: " << CountNeighbors(0, 2);
+   qDebug() << "right edge: " << CountNeighbors(2, 19);
+   qDebug() << "bottom edge: " << CountNeighbors(9, 2);
+   qDebug() << "middle: " << CountNeighbors(1,1);
+   QColor arr[10][20];
+   int neighbors;
+   for(int i = 0; i < 10; i++) {
+       for(int j = 0; j < 20; j++) {
+           neighbors = CountNeighbors(i, j);
+           // if alive
+           if(cells[i][j]->get_color() == QColor(66, 158, 244)) {
+               if(neighbors < 2) {
+                   arr[i][j] = QColor(255, 255, 255);
+                   changePopulation(-1);
+               } else if(neighbors == 2 || neighbors == 3) {
+                   arr[i][j] = QColor(66, 158, 244);
+               } else {
+                   arr[i][j] = QColor(255, 255, 255);
+                   changePopulation(-1);
+               }
+           }
+           // if dead
+           else {
+               if(neighbors == 3) {
+                   arr[i][j] = QColor(255, 0, 0);
+                   changePopulation(1);
+               } else {
+                   arr[i][j] = QColor(255, 255, 255);
+               }
+           }
+       }
+   }
+   for(int i = 0; i < 10; i++) {
+       for(int j = 0; j < 20; j++) {
+           cells[i][j]->set_color(arr[i][j]);
+       }
+   }
+   cellScene->update();
    GenerateBars();
+}
+
+int LifeWindow::CountNeighbors(int i, int j){
+    int count = 0;
+
+    if(i==0 && j==0){ //upper left
+        count += IsAlive(0,1)+IsAlive(1,0)+IsAlive(1,1)+IsAlive(0,19)+IsAlive(1,19)+IsAlive(9,0)+IsAlive(9,1)+IsAlive(9,19);
+    }
+    else if(i==0 && j==19){ //upper right
+        count += IsAlive(0,18)+IsAlive(1,18)+IsAlive(1,19)+IsAlive(0,0)+IsAlive(1,0)+IsAlive(9,18)+IsAlive(9,19)+IsAlive(9,0);
+    }
+    else if(i==9 && j==0){ //lower left
+        count += IsAlive(8,19)+IsAlive(8,0)+IsAlive(8,1)+IsAlive(9,19)+IsAlive(9,1)+IsAlive(0,19)+IsAlive(0,0)+IsAlive(0,1);
+    }
+    else if(i==9 && j==19){ //lower right
+        count += IsAlive(8,18)+IsAlive(8,19)+IsAlive(8,0)+IsAlive(9,18)+IsAlive(9,0)+IsAlive(0,18)+IsAlive(0,19)+IsAlive(0,0);
+    }
+    else if(i == 0){//first row
+        count += IsAlive(9,j-1)+IsAlive(9,j)+IsAlive(9,j+1)+IsAlive(i,j-1)+IsAlive(i,j+1)+IsAlive(i+1,j-1)+IsAlive(i+1,j)+IsAlive(i+1,j+1);
+    }
+    else if(i == 9){//last row
+        count += IsAlive(0,j-1)+IsAlive(0,j)+IsAlive(0,j+1)+IsAlive(i,j-1)+IsAlive(i,j+1)+IsAlive(i-1,j-1)+IsAlive(i-1,j)+IsAlive(i-1,j+1);
+    }
+    else if(j == 0){//first column
+        count += IsAlive(i-1,19)+IsAlive(i,19)+IsAlive(i+1,19)+IsAlive(i-1,j)+IsAlive(i+1,j)+IsAlive(i-1,j+1)+IsAlive(i,j+1)+IsAlive(i+1,j+1);
+
+    }
+    else if(j == 19){//last column
+        count += IsAlive(i-1,0)+IsAlive(i,0)+IsAlive(i+1,0)+IsAlive(i-1,j)+IsAlive(i+1,j)+IsAlive(i-1,j-1)+IsAlive(i,j-1)+IsAlive(i+1,j-1);
+    }
+    else{
+        count += IsAlive(i-1,j-1)+IsAlive(i-1,j)+IsAlive(i-1,j+1)+IsAlive(i,j-1)+IsAlive(i,j+1)+IsAlive(i+1,j-1)+IsAlive(i+1,j)+IsAlive(i+1,j+1);
+    }
+
+    return count;
+}
+
+bool LifeWindow::IsAlive(int i, int j){
+    if(cells[i][j]->get_color()== QColor(66, 158, 244)){
+        return true;
+    }
+    return false;
 }
 
 void LifeWindow::RepaintCells(){
@@ -113,12 +198,15 @@ void LifeWindow::GenerateBars(){
 
 void LifeWindow::on_newSampleButton_clicked()
 {
-    populate();
     for(int i = 0; i < 20; i++) { //reset bars
         bars_[i] = 0.0;
     }
+
+
     barScene->clear(); //clear the bars
     barScene->update();
+    populate();
+
 }
 
 void LifeWindow::on_stepButton_clicked()
@@ -162,4 +250,10 @@ void LifeWindow::IncreaseTurn(){
 void LifeWindow::on_pauseButton_clicked()
 {
     timer->stop();
+}
+
+void LifeWindow::changePopulation(int x) {
+    population_ += x;
+    ui->population->setText(QString("Population: ")+QString::number(population_)+QString(" (")+QString::number((population_*100)/200)+QString("%)"));
+
 }
