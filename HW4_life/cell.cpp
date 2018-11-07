@@ -14,17 +14,32 @@ Cell::Cell(QColor color, int x, int y, int sceneWidth, int sceneHeight){
     sceneHeight_ = sceneHeight;
 }
 
+/**
+    sets the bounding rectangle of an object
+    @param none
+    @return QRectF
+*/
 QRectF Cell::boundingRect() const
 {
     return QRectF(this->x_, this->y_, x_ + sceneWidth_, y_ + sceneHeight_);
 }
 
+/**
+    sets the shape of an object
+    @param none
+    @return QPainterPath
+*/
 QPainterPath Cell::shape() const{
     QPainterPath path;
     path.addRect(this->x_, this->y_, x_ + sceneWidth_, y_ + sceneHeight_);
     return path;
 }
 
+/**
+    void function to paint the cells and set brush color
+    @param cell *QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget
+    @return void
+*/
 void Cell::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     Q_UNUSED(widget);
@@ -38,6 +53,11 @@ void Cell::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setBrush(b);
 }
 
+/**
+    emits a rightclick or left click signal when a cell is pressed
+    @param QGraphicsSceneMouseEvent *event
+    @return void
+*/
 void Cell::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->buttons() == Qt::RightButton){ //right click

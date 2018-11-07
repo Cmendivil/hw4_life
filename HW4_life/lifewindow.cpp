@@ -4,6 +4,15 @@
 #include <QDebug>
 #include <QTimer>
 
+
+/**
+	The constructor for the window.
+	Sets the cellView and barView
+	Creates grids on the cellView
+	Populates the cells
+	@param QWidget
+	@return constructor for LifeWindow
+**/
 LifeWindow::LifeWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::LifeWindow)
@@ -48,6 +57,12 @@ LifeWindow::~LifeWindow()
     delete ui;
 }
 
+/**
+	void function to populate the cells
+	Adds colors to cells based on random 50%
+	@param None
+	@return None
+*/
 void LifeWindow::populate(){
     turn_=0;
     population_=0;
@@ -72,6 +87,12 @@ void LifeWindow::populate(){
     ui->population->setText(QString("Population: ")+QString::number(population_)+QString(" (")+QString::number((population_*100)/200)+QString("%)"));
 }
 
+/**
+	counts the neighbors of each cell, and determines
+	whether they become alive, stay alive, or die
+	@param none
+	@return void
+*/
 void LifeWindow::TakeTurn(){
    IncreaseTurn();
    RepaintCells();
@@ -121,6 +142,12 @@ void LifeWindow::TakeTurn(){
    GenerateBars();
 }
 
+/**
+	used to count the number of neighbors that a cell has
+	counts corner cases, edge cases, and regular cases
+	@param int row, int column
+	@return int number of neighbors
+*/
 int LifeWindow::CountNeighbors(int i, int j){
     int count = 0;
 
@@ -156,6 +183,12 @@ int LifeWindow::CountNeighbors(int i, int j){
     return count;
 }
 
+/**
+	void function check if a cell is alive
+	by checking its color
+	@param int row, int col
+	@return boolean is alive
+*/
 bool LifeWindow::IsAlive(int i, int j){
     if(cells[i][j]->get_color()== QColor(66, 158, 244)){
         return true;
@@ -163,6 +196,12 @@ bool LifeWindow::IsAlive(int i, int j){
     return false;
 }
 
+/**
+	void function to repaint the cells blue if 
+	it is red
+	@param none
+	@return void
+*/
 void LifeWindow::RepaintCells(){
     for(int i = 0; i < 10; i++) {
         for(int j = 0; j < 20; j++) {
@@ -174,6 +213,12 @@ void LifeWindow::RepaintCells(){
     cellScene->update();
 }
 
+/**
+	void function to generate and update the
+	bar graph based on population
+	@param none
+	@return void
+*/
 void LifeWindow::GenerateBars(){
     if(bars_[19] != 0.0){
         barScene->clear();
@@ -196,6 +241,12 @@ void LifeWindow::GenerateBars(){
     }
 }
 
+/**
+	void function to reset bars and populate a
+	new random sample
+	@param none
+	@return void
+*/
 void LifeWindow::on_newSampleButton_clicked()
 {
     for(int i = 0; i < 20; i++) { //reset bars
@@ -209,17 +260,33 @@ void LifeWindow::on_newSampleButton_clicked()
 
 }
 
+/**
+	void function to increment number of turns
+	@param none
+	@return void
+*/
 void LifeWindow::on_stepButton_clicked()
 {
     TakeTurn();
 }
 
+/**
+	void function to change speed of the ui
+	@param value
+	@return void
+*/
 void LifeWindow::on_speedSlider_valueChanged(int value)
 {
     speed_ = 1-(value/100.0);
     ui->speed->setText(QString("Speed: ")+QString::number(speed_, 'f', 6));
 }
 
+/**
+	void function on left click, changes color from white to red
+	increases population
+	@param cell * pointer
+	@return void
+*/
 void LifeWindow::LeftClickSlot(Cell * c){
     if (c->get_color() == QColor(255, 255, 255)){
         population_++;
@@ -228,6 +295,12 @@ void LifeWindow::LeftClickSlot(Cell * c){
     }
 }
 
+/**
+	void function on left click, changes color from blue/red to white
+	decreases population
+	@param cell * pointer
+	@return void
+*/
 void LifeWindow::RightClickSlot(Cell * c){
     if (c->get_color() != QColor(255, 255, 255)){
         population_--;
@@ -236,22 +309,42 @@ void LifeWindow::RightClickSlot(Cell * c){
     }
 }
 
+/**
+	void function to start timer when play button is clicked
+	@param none
+	@return void
+*/
 void LifeWindow::on_playButton_clicked()
 {
     TakeTurn();
     timer->start(speed_*1000);
 }
 
+/**
+	increases the turn count and updates it on ui
+	@param none
+	@return void
+*/
 void LifeWindow::IncreaseTurn(){
     turn_++;
     ui->turn->setText(QString("Turn: ")+QString::number(turn_));
 }
 
+/**
+	void function on left click, changes color from white to red
+	@param cell * pointer
+	@return void
+*/
 void LifeWindow::on_pauseButton_clicked()
 {
     timer->stop();
 }
 
+/**
+	void function to change the population
+	@param int x (change)
+	@return void
+*/
 void LifeWindow::changePopulation(int x) {
     population_ += x;
     ui->population->setText(QString("Population: ")+QString::number(population_)+QString(" (")+QString::number((population_*100)/200)+QString("%)"));
